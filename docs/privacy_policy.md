@@ -1,6 +1,6 @@
 # TrackBloom Privacy Policy
 
-**Last Updated:** December 2024
+**Last Updated:** July 2025
 
 ## Introduction
 
@@ -77,12 +77,12 @@ Since TrackBloom operates entirely offline and does not collect or process any d
 
 We may update this Privacy Policy from time to time. Any changes will be reflected in the "Last Updated" date at the top of this policy. We encourage you to review this policy periodically.
 
-## Contact Information
+<!-- ## Contact Information
 
 If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
 
 **Email:** privacy@trackbloom.app  
-**Website:** https://trackbloom.app
+**Website:** https://trackbloom.app -->
 
 ## Legal Basis for Processing (GDPR)
 
