@@ -1,3 +1,9 @@
+---
+layout: default
+title: TrackBloom Privacy Policy
+permalink: /privacy_policy
+---
+
 # TrackBloom Privacy Policy
 
 **Last Updated:** July 2025

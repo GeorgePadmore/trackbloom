@@ -15,6 +15,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
   String _filter = 'all'; // all, completed, active
   String _sort = 'streak'; // streak, name, success
   bool _groupByStatus = false;
+  late Future<List<_HabitProgressData>> _habitsProgressFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
+
+  void _loadProgress() {
+    _habitsProgressFuture = _fetchAllHabitsProgress();
+  }
+
+  Future<void> _refresh() async {
+    setState(_loadProgress);
+    await _habitsProgressFuture;
+  }
 
   Future<List<_HabitProgressData>> _fetchAllHabitsProgress() async {
     final db = DatabaseService();
@@ -141,13 +157,36 @@ class _ProgressScreenState extends State<ProgressScreen> {
             const SizedBox(height: 8),
             Expanded(
               child: FutureBuilder<List<_HabitProgressData>>(
-                future: _fetchAllHabitsProgress(),
+                future: _habitsProgressFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No habits tracked yet.'));
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 120),
+                          Icon(Icons.bar_chart_outlined, size: 64, color: Colors.grey),
+                          SizedBox(height: 12),
+                          Center(
+                            child: Text(
+                              'No habits tracked yet.',
+                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Center(
+                            child: Text(
+                              'Add habits on the home screen to see progress.',
+                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                   final habitProgressList = _applyFilterSortGroup(
                     snapshot.data!,
@@ -159,7 +198,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     final active = habitProgressList
                         .where((d) => !d.habit.isCompleted)
                         .toList();
-                    return ListView(
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
@@ -206,9 +248,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           ),
                         ],
                       ],
+                    ),
                     );
                   }
-                  return ListView.separated(
+                  return RefreshIndicator(
+                    onRefresh: _refresh,
+                    child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
@@ -224,6 +270,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         successRate: data.progress.successRate,
                       );
                     },
+                  ),
                   );
                 },
               ),

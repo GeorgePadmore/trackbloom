@@ -1,0 +1,6 @@
+title: TrackBloom
+description: Privacy-first habit and task tracker
+baseurl: "/trackbloom"
+url: "https://georgepadmore.github.io"
+markdown: kramdown
+permalink: pretty

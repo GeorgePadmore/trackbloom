@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'screens/progress_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(
   ThemeMode.light,
@@ -123,8 +124,15 @@ class GradientHeader extends StatelessWidget {
   }
 }
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late final Future<PackageInfo> _packageInfoFuture = PackageInfo.fromPlatform();
 
   Future<void> _toggleTheme(bool isDark) async {
     final prefs = await SharedPreferences.getInstance();
@@ -175,8 +183,16 @@ class SettingsScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Track Bloom - Minimalist Habit & Task Tracker\nVersion 1.0.0',
+                  FutureBuilder<PackageInfo>(
+                    future: _packageInfoFuture,
+                    builder: (context, snapshot) {
+                      final String versionLabel = snapshot.hasData
+                          ? 'Version ${snapshot.data!.version}'
+                          : 'Version ...';
+                      return Text(
+                        'Track Bloom - Minimalist Habit & Task Tracker\n$versionLabel',
+                      );
+                    },
                   ),
                 ],
               ),

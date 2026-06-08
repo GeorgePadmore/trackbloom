@@ -31,8 +31,9 @@ class _HomeScreenState extends State<HomeScreen>
     _todayItemsFuture = DatabaseService().getTodayItems(DateTime.now());
   }
 
-  void _refresh() {
+  Future<void> _refresh() async {
     setState(_loadItems);
+    await _todayItemsFuture;
   }
 
   @override
@@ -131,23 +132,36 @@ class _HomeScreenState extends State<HomeScreen>
                               return Center(child: Text('Error: \\${snapshot.error}'));
                             }
                             final items = snapshot.data ?? [];
-                            return AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 350),
-                              child: items.isEmpty
-                                  ? Column(
-                                      key: const ValueKey('empty'),
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: const [
-                                        Icon(Icons.inbox, size: 64, color: Colors.grey),
-                                        SizedBox(height: 12),
-                                        Text(
-                                          'No items for today.',
-                                          style: TextStyle(fontSize: 18, color: Colors.grey),
-                                        ),
-                                      ],
-                                    )
-                                  : ListView.builder(
+                            return RefreshIndicator(
+                              onRefresh: _refresh,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 350),
+                                child: items.isEmpty
+                                    ? ListView(
+                                        key: const ValueKey('empty'),
+                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        children: const [
+                                          SizedBox(height: 120),
+                                          Icon(Icons.inbox, size: 64, color: Colors.grey),
+                                          SizedBox(height: 12),
+                                          Center(
+                                            child: Text(
+                                              'No items for today.',
+                                              style: TextStyle(fontSize: 18, color: Colors.grey),
+                                            ),
+                                          ),
+                                          SizedBox(height: 8),
+                                          Center(
+                                            child: Text(
+                                              'Tap + to add a habit or task.',
+                                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : ListView.builder(
                                       key: const ValueKey('list'),
+                                      physics: const AlwaysScrollableScrollPhysics(),
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                       itemCount: items.length,
                                       itemBuilder: (context, index) {
@@ -205,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen>
                                         }
                                       },
                                     ),
+                              ),
                             );
                           },
                         ),
@@ -222,19 +237,42 @@ class _HomeScreenState extends State<HomeScreen>
                         return Center(child: Text('Error: \\${snapshot.error}'));
                       }
                       final items = (snapshot.data ?? []).where((item) => item.type == ItemType.habit).toList();
-                      if (items.isEmpty) {
-                        return const Center(child: Text('No habits for today.'));
-                      }
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return ItemTile(
-                            item: item,
-                            onChanged: _refresh,
-                          );
-                        },
+                      return RefreshIndicator(
+                        onRefresh: _refresh,
+                        child: items.isEmpty
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: const [
+                                  SizedBox(height: 120),
+                                  Icon(Icons.spa_outlined, size: 64, color: Colors.grey),
+                                  SizedBox(height: 12),
+                                  Center(
+                                    child: Text(
+                                      'No habits for today.',
+                                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Center(
+                                    child: Text(
+                                      'Add a habit from the + button.',
+                                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  final item = items[index];
+                                  return ItemTile(
+                                    item: item,
+                                    onChanged: () => _refresh(),
+                                  );
+                                },
+                              ),
                       );
                     },
                   ),
