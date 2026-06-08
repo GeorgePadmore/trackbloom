@@ -6,7 +6,7 @@ permalink: /privacy_policy
 
 # TrackBloom Privacy Policy
 
-**Last Updated:** July 2025
+**Last Updated:** June 2026
 
 ## Introduction
 
